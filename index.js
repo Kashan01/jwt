@@ -37,23 +37,27 @@ if(user){
 
 })
 
-
-app.get("/me", (req, res) => {
-    const token = req.headers.token;
-    const userDetails = jwt.verify(token, JWT_SECRET);
-
-    const username =  userDetails.username;
-    const user = users.find(user => user.username === username);
-
-    if (user) {
-        res.send({
-            username: user.username
-        })
-    } else {
-        res.status(401).send({
-            message: "Unauthorized"
+function auth(req,res,next){
+    const token=req.header.token
+    const decodedData = jwt.verify(token,JWT_SECRET)
+    if(decodedData.username){
+        req.username=decodedData.username
+        next()
+    }else{
+        res.json({
+            message:"You are not logged in..."
         })
     }
+
+}
+
+app.get("/me", (req, res) => {
+
+    const user = users.find(user => user.username === req.username);
+
+    res.json({
+        message:"You are authorised to this..."
+    })
 })
 
 
